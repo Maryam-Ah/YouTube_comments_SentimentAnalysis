@@ -5,7 +5,10 @@ numpy
 scikit-learn
 matplotlib
 joblib 
-scipy
-azureml
-anaconda
-seaborn
+googleapiclient
+google_auth_oauthlib
+langdetect
+textblob
+mlxtend
+nltk
+
