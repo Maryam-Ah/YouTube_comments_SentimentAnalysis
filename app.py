@@ -49,7 +49,7 @@ MISSING_CLIENT_SECRETS_MESSAGE = "WARNING: Please configure OAuth 2.0"
 
 def get_authenticated_service():
 #     print(args)
-    flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_READ_WRITE_SSL_SCOPE,
+    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, scope=YOUTUBE_READ_WRITE_SSL_SCOPE,
                                    message=MISSING_CLIENT_SECRETS_MESSAGE)
     storage = Storage("%s-oauth2.json" % sys.argv[0])
     credentials = storage.get()
