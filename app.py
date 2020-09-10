@@ -4,10 +4,10 @@
 # In[1]:
 
 
-get_ipython().system('pip install google-auth google-auth-oauthlib google-auth-httplib2')
-get_ipython().system('pip install demoji')
-get_ipython().system('pip install pandas')
-get_ipython().system('pip install langdetect')
+# get_ipython().system('pip install google-auth google-auth-oauthlib google-auth-httplib2')
+# get_ipython().system('pip install demoji')
+# get_ipython().system('pip install pandas')
+# get_ipython().system('pip install langdetect')
 
 
 # In[4]:
@@ -29,6 +29,7 @@ import string
 import pickle 
 import joblib
 import os
+import streamlit as st
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer 
 # from google.colab import drive
 
@@ -36,7 +37,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 # In[5]:
 
 
-CLIENT_SECRETS_FILE = "/content/drive/My Drive/Colab Notebooks/Youtube API/client_secret.json"
+CLIENT_SECRETS_FILE = "client_secret.json"
 SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl']
 API_SERVICE_NAME = 'youtube'
 API_VERSION = 'v3'
@@ -53,16 +54,16 @@ def get_authenticated_service():
 
 # In[12]:
 
-
-drive.mount('/content/drive')
-os.chdir('/content/drive/My Drive/Colab Notebooks/Youtube API')
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+# 
+# drive.mount('/content/drive')
+# os.chdir('/content/drive/My Drive/Colab Notebooks/Youtube API')
+# os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 service = get_authenticated_service()
 
 
 # In[ ]:
 
-query = st.text_input("Please copy and past the name of video on YouTube here: ", Grab the tomatoes before they drop, and make something delicious - ruby ketchup)
+query = st.text_input("Please copy and past the name of video on YouTube here: ")
 query = "How the Grinch Stole Christmas (2/9) Movie CLIP - Baby Grinch (2000) HD"
 
 
@@ -252,7 +253,7 @@ def remove_stopwords(line):
     return " ".join(filtered_sentence)
 
 
-vect_loaded = pickle.load(open('/content/drive/My Drive/Colab Notebooks/Youtube API/vect.pkl', 'rb'))
+vect_loaded = pickle.load(open('vect.pkl', 'rb'))
 
 
 data['stop_comments'] = data['comments'].apply(lambda x : remove_stopwords(x))
@@ -261,7 +262,7 @@ X_test = data['stop_comments']
 
 tf_test = vect_loaded.transform(X_test)
 
-model_loaded = pickle.load(open('/content/drive/My Drive/Colab Notebooks/Youtube API/lr.pkl', 'rb'))
+model_loaded = pickle.load(open('lr.pkl', 'rb'))
 
 predicted = model_loaded.predict(tf_test)
 
@@ -280,11 +281,14 @@ for i in range(0,len(predicted)):
 
 
 if (data_pos)>= (len(predicted)/3):
-  print ("Positive comments")
+#   print ("Positive comments")
+   st.success('The output is : {}'.format(" More than 55% of the comments are Positive"))
 elif (data_pos)== (len(predicted)/2):
-  print ("Not positive and Not negetive comments")
+#   print ("Not positive and Not negetive comments")
+  st.success('The output is : {}'.format("Same percentages of Negetive and Positive comments"))
 else:
-  print("Negetive comments")
+#   print("Negetive comments")
+  st.success('The output is : {}'.format("Less than 50% of the comments are Positive")) 
 
 
 # In[16]:

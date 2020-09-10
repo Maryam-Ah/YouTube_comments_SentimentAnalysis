@@ -5,10 +5,12 @@ numpy
 scikit-learn
 matplotlib
 joblib 
-googleapiclient
+google-api-python-client==1.7.9
 google_auth_oauthlib
+google-auth
+google-auth-httplib2
 langdetect
 textblob
 mlxtend
 nltk
-
+demoji
