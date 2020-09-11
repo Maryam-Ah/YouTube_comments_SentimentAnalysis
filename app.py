@@ -36,43 +36,20 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
 # In[5]:
 
-CLIENT_SECRETS_FILE = "client_secrets.json"
-YOUTUBE_READ_WRITE_SSL_SCOPE = "https://www.googleapis.com/auth/youtube.force-ssl"
-YOUTUBE_API_SERVICE_NAME = "youtube"
-YOUTUBE_API_VERSION = "v3"
-MISSING_CLIENT_SECRETS_MESSAGE = "WARNING: Please configure OAuth 2.0"
 
-
-# tools.argparser.add_argument('-ci', '--client-id', type=str,required = True, help = 'The client ID of your GCP project')
-# tools.argparser.add_argument('-cs', '--client-secret', type=str, required=True, help='The client Secret of your GCP project')
-
-
-def get_authenticated_service():
-#     print(args)
-    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, scope=YOUTUBE_READ_WRITE_SSL_SCOPE,
-                                   message=MISSING_CLIENT_SECRETS_MESSAGE)
-    storage = Storage("%s-oauth2.json" % sys.argv[0])
-    credentials = storage.get()
-    if credentials is None or credentials.invalid:
-        credentials = run_flow(flow, storage, args)
-    with open("youtube-v3-discoverydocument.json", "r") as f:
-        doc = f.read()
-        return build_from_document(doc, http=credentials.authorize(httplib2.Http()))
-      
-      
-# CLIENT_SECRETS_FILE = "client_secret.json"
-# SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl']
-# API_SERVICE_NAME = 'youtube'
-# API_VERSION = 'v3'
+CLIENT_SECRETS_FILE = "client_secret.json"
+SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl']
+API_SERVICE_NAME = 'youtube'
+API_VERSION = 'v3'
 
 
 # In[10]:
 
 
-# def get_authenticated_service():
-#   flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
-#   credentials = flow.run_console()
-#   return build(API_SERVICE_NAME, API_VERSION, credentials = credentials)
+def get_authenticated_service():
+    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
+    credentials = flow.run_console()
+    return build(API_SERVICE_NAME, API_VERSION, credentials = credentials)
 
 
 # In[12]:
@@ -86,7 +63,7 @@ service = get_authenticated_service()
 
 # In[ ]:
 
-query = st.text_input("Please copy and past the name of video on YouTube here: ")
+query = st.text_input("Please copy and past the name of the video on YouTube here: ")
 query = "How the Grinch Stole Christmas (2/9) Movie CLIP - Baby Grinch (2000) HD"
 
 
@@ -138,7 +115,7 @@ like_count_temp = []
 nextPage_token = None
 
 while 1:
-  response = service.commentThreads().list(
+    response = service.commentThreads().list(
                     part = 'snippet',
                     videoId = video_id,
                     maxResults = 100, 
@@ -148,24 +125,24 @@ while 1:
                     ).execute()
 
 
-  nextPage_token = response.get('nextPageToken')
-  for item in response['items']:
-      comments_temp.append(item['snippet']['topLevelComment']['snippet']['textDisplay'])
-      comment_id_temp.append(item['snippet']['topLevelComment']['id'])
-      reply_count_temp.append(item['snippet']['totalReplyCount'])
-      like_count_temp.append(item['snippet']['topLevelComment']['snippet']['likeCount'])
-      comments_pop.extend(comments_temp)
-      comment_id_pop.extend(comment_id_temp)
-      reply_count_pop.extend(reply_count_temp)
-      like_count_pop.extend(like_count_temp)
-        
-      video_id_pop.extend([video_id]*len(comments_temp))
-      channel_pop.extend([channel]*len(comments_temp))
-      video_title_pop.extend([video_title]*len(comments_temp))
-      video_desc_pop.extend([video_desc]*len(comments_temp))
+    nextPage_token = response.get('nextPageToken')
+    for item in response['items']:
+        comments_temp.append(item['snippet']['topLevelComment']['snippet']['textDisplay'])
+        comment_id_temp.append(item['snippet']['topLevelComment']['id'])
+        reply_count_temp.append(item['snippet']['totalReplyCount'])
+        like_count_temp.append(item['snippet']['topLevelComment']['snippet']['likeCount'])
+        comments_pop.extend(comments_temp)
+        comment_id_pop.extend(comment_id_temp)
+        reply_count_pop.extend(reply_count_temp)
+        like_count_pop.extend(like_count_temp)
 
-  if nextPage_token is  None:
-    break
+        video_id_pop.extend([video_id]*len(comments_temp))
+        channel_pop.extend([channel]*len(comments_temp))
+        video_title_pop.extend([video_title]*len(comments_temp))
+        video_desc_pop.extend([video_desc]*len(comments_temp))
+
+    if nextPage_token is  None:
+        break
 
 
 
@@ -198,14 +175,13 @@ comments['language'] = 0
 
 count = 0
 for i in range(0,len(comments)):
-
-
-  temp = comments['clean_comments'].iloc[i]
-  count += 1
-  try:
-    comments['language'].iloc[i] = detect(temp)
-  except:
-    comments['language'].iloc[i] = "error"
+    
+    temp = comments['clean_comments'].iloc[i]
+    count += 1
+    try:
+        comments['language'].iloc[i] = detect(temp)
+    except:
+        comments['language'].iloc[i] = "error"
 
 
 comments[comments['language']=='en']['language'].value_counts()
@@ -287,8 +263,6 @@ tf_test = vect_loaded.transform(X_test['stop_comments'])
 model_loaded = pickle.load(open('lr.pkl', 'rb'))
 
 predicted = model_loaded.predict(tf_test)
-
-
 # In[94]:
 
 
@@ -296,21 +270,24 @@ data_pos =0
 data_neg = 0
 
 for i in range(0,len(predicted)):
-  if (predicted[i] == 1):
-     data_pos = data_pos + 1
-  else:
-    data_neg = data_neg + 1
+    if (predicted[i] == 1):
+        data_pos = data_pos + 1
+    else:
+        data_neg = data_neg + 1
 
 
-if (data_pos)>= (len(predicted)/3):
+if (data_pos)>= (data_neg):
 #   print ("Positive comments")
-   st.success('The output is : {}'.format(" More than 55% of the comments are Positive"))
-elif (data_pos)== (len(predicted)/2):
+    st.success('The output is : {}'.format(" Positive comments are more than negetive comments"))
+    st.success("Most Repeated worsd are:")
+elif (data_pos)== (data_neg):
 #   print ("Not positive and Not negetive comments")
-  st.success('The output is : {}'.format("Same percentages of Negetive and Positive comments"))
+    st.success('The output is : {}'.format("positive comments and Negetive comments are equal"))
+    st.success("Most Repeated worsd are:")
 else:
 #   print("Negetive comments")
-  st.success('The output is : {}'.format("Less than 50% of the comments are Positive")) 
+    st.success('The output is : {}'.format("Negetive comments are more than Positive comments")) 
+    st.success("Most Repeated worsd are:")
 
 
 # In[16]:
