@@ -233,7 +233,6 @@ dataset = dataset.rename(columns = {"regular_comments":"comments"})
 
 # In[90]:
 
-
 data = dataset
 
 
@@ -280,10 +279,10 @@ vect_loaded = pickle.load(open('vect.pkl', 'rb'))
 
 
 data['stop_comments'] = data['comments'].apply(lambda x : remove_stopwords(x))
-X_test = data['stop_comments']
+X_test = data[['stop_comments','Likes']]
 
 
-tf_test = vect_loaded.transform(X_test)
+tf_test = vect_loaded.transform(X_test['stop_comments'])
 
 model_loaded = pickle.load(open('lr.pkl', 'rb'))
 
